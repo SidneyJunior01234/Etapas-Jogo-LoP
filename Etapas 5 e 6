@@ -1,0 +1,104 @@
+/* 
+    Equipe: 
+        Sidney Alves dos Santos Junior - Subturma C (Líder) 
+        Claudiano Leonardo da Silva - Subturma A 
+        Etapa 5 e 6
+*/
+
+let x = 200,
+    y = 350,
+    r = 30;
+
+let xD = x,
+    yD = y;
+
+let xO, yO, rO = 50;
+
+let estado = false;
+
+let pontos = 0;
+
+function setup() 
+{
+  createCanvas(400, 400);
+  xO = random(50,350);
+  yO = 50;
+}
+
+function draw()
+{
+  background(220);
+  
+  //personagem
+  ellipse(x,y,r,r);
+  //bala
+  ellipse(xD,yD,3,3);
+  //objeto
+  ellipse(xO,yO,rO,rO);
+  
+  mover(2);
+  atirar(10);
+  
+  //etapa 5
+  textSize(32);
+  text("Pontos: "+pontos,150,397)
+  //etapa 6
+  if(colisao_bala(xD,yD,xO,yO,r))
+  {
+    pontos++;
+    estado = false;
+  }
+}
+
+
+function mover(v)
+{
+  
+  if(keyIsDown(LEFT_ARROW))
+  {
+       x -= v;
+  }
+  else if(keyIsDown(RIGHT_ARROW))
+  {
+    x += v;
+  }
+  
+}
+
+function atirar(v)
+{
+  
+  if(estado == false)
+  {
+    xD = x;
+    yD = y;
+  }
+  
+  if(keyIsDown(UP_ARROW) && estado == false)
+  {
+    estado = true;
+  }
+  
+  if(yD>0 && estado == true) 
+  {
+    yD -= v;
+  }
+  else
+  {
+    estado = false;
+  }
+}
+
+//etapa 6
+function colisao_bala(xPer,yPer,xObj,yObj,r)
+{
+  var dist_personagem = parseInt(dist(xPer,yPer,xObj,yObj));
+  if(dist_personagem <= r)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
