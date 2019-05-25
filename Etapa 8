@@ -1,0 +1,54 @@
+/* 
+    Equipe: 
+        Sidney Alves dos Santos Junior - Subturma C (Líder) 
+        Claudiano Leonardo da Silva - Subturma A 
+        Etapa 8
+*/
+
+let nivel = 0,
+    xp_tam_x = 2,
+    prox_nivel = 1720;
+
+let pontos = 0;
+
+function setup() 
+{
+  createCanvas(400, 400);
+}
+
+function draw() 
+{
+  background(0);
+  
+  pontos++;
+  console.log(pontos)
+  if(pontos%27 == 0)
+  {
+    xp_tam_x += random(1,7);
+  }
+  
+  if(xp_tam_x > 50)
+  {
+    xp_tam_x = 2;
+    nivel++;
+    pontos = 0;
+  }
+  
+  fill(255,255,0);
+  textSize(16);
+  text("xp",170,20);
+  text("Nível: "+nivel,300,20);
+  
+  fill(255,255,255);
+  textSize(16);
+  text("xp",170,20);
+  text("Pontos: "+pontos,20,380);
+  
+  fill(255,255,255,100);
+  scale(3,0.7);
+  rect(5, 10, 50, 25);
+  
+  fill(255,255,0);
+  rect(5, 10,xp_tam_x, 25);
+  
+}
