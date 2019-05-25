@@ -1,0 +1,59 @@
+/* 
+    Equipe: 
+        Sidney Alves dos Santos Junior - Subturma C (Líder) 
+        Claudiano Leonardo da Silva - Subturma A 
+        Etapa 7
+*/
+
+let estrela_pos_x = [],
+    estrela_pos_y = [],
+    estrela_tam_r = [],
+    estrela_vel_y = [],
+    estrela_qnt = 200;
+
+function gerar_estrelas()
+{
+  for(i=0; i<estrela_qnt; i++)
+  {
+    estrela_pos_x[i] = random(20,380);
+    estrela_pos_y[i] = -random(50);
+    if(i<= (estrela_qnt/2))
+    {
+      estrela_tam_r[i] = random(2,4);
+      estrela_vel_y[i] = random(3,5);
+    }
+    else
+    {
+      estrela_tam_r[i] = random(4,8);
+      estrela_vel_y[i] = random(1,3);
+    }
+  }
+}
+
+function desenhar_estrelas()
+{
+  for(i=0; i<estrela_qnt; i++)
+  {
+    ellipse(estrela_pos_x[i],estrela_pos_y[i],
+            estrela_tam_r[i],estrela_tam_r[i]);
+    if(estrela_pos_y[i] > 400)
+    {
+       estrela_pos_y[i] = -random(10);
+    }
+    else
+    {
+      estrela_pos_y[i] += estrela_vel_y[i];
+    }
+  }
+}
+
+function setup() 
+{
+  createCanvas(400, 400);
+  gerar_estrelas();
+}
+
+function draw() {
+  background(0);
+  desenhar_estrelas();
+}
