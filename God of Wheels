@@ -1,0 +1,455 @@
+/*
+  Grupo:
+    Sidney Alves dos Santos Junior
+    Claudiano Leonardo da Silva
+  Jogo:
+    Generico
+    nome: a definir
+*/
+
+//tamanho canvas
+let canvas_x = 400,
+    canvas_y = 500;
+
+//pontos, vlocidade e nivel
+let pontos = 0,
+    pontos_contador = 0,
+    pontos_limite = 25,
+    pos_pontos_x = 315,
+    pos_pontos_y = 80,
+    
+    velocidade = 2,
+    pos_velo_x = 340,
+    pos_velo_y = 200,
+    
+    nivel = 1,
+    pos_nivel_x = 340,
+    pos_nivel_y = 320;
+
+//cenas
+let cena = 0;
+
+//Imagens
+let imagem_jogo,
+    imagem_creditos,
+    
+    //logo
+    imagem_logo,
+    pos_logo_x = 0,
+    pos_logo_y = 0,
+    
+    //botao voltar creditos
+    imagem_botao_voltar = [],
+    pos_botao_voltar_x = 125,
+    pos_botao_voltar_y = 450,
+    
+    //botoes menu
+    imagem_botao_jogar = [],
+    pos_botao_jogar_x = 125,
+    pos_botao_jogar_y = 250,
+    
+    imagem_botao_tutorial = [],
+    pos_botao_tuto_x = 125,
+    pos_botao_tuto_y = 300,
+    
+    imagem_botao_creditos = [],
+    pos_botao_cred_x = 125,
+    pos_botao_cred_y = 350;
+    
+    //botao musica
+let imagem_botao_musica = [],
+    pos_botao_musica_x = 325,
+    pos_botao_musica_y = 390;
+    
+    //inimigo
+let imagem_inimigo;
+
+    //fim de jogo
+let imagem_fim_de_jogo;
+    //tutorial
+let imagem_tutorial;
+
+//sons
+let som_botao_selec,
+    som_colisao;
+
+//musicas
+let musica_menu,
+    musica_jogo,
+    musica_fim,
+    tocar_musica = true;
+
+//personagem
+let imagem_jogador,
+    jogador_pos_x = 125,
+    jogador_pos_y = 440,
+    jogador_veloc = 6;
+
+//fucao do jogador
+function jogador() 
+{
+  image(imagem_jogador,jogador_pos_x,jogador_pos_y);
+  //movimento
+  if((keyIsDown(LEFT_ARROW) || keyIsDown(65)) && jogador_pos_x >= 10)
+  {
+    jogador_pos_x -= jogador_veloc;
+  }
+  else if((keyIsDown(RIGHT_ARROW) || keyIsDown(68)) && jogador_pos_x <= 235)
+  {
+    jogador_pos_x += jogador_veloc;
+  }
+}
+
+//inimigo
+//pistas que o inimigo ira seguir
+function pistas()
+{
+  let pista = 0,
+      pista_sorteio = 0;
+  
+  pista_sorteio = parseInt(random(0,6));
+  
+  switch(pista_sorteio)
+  {
+    case 1:
+      pista = 20;
+      break;
+    case 2:
+      pista = 72;
+      break;
+    case 3:
+      pista = 125;
+      break;
+    case 4:
+      pista = 177;
+      break;
+    case 5:
+      pista = 230;
+      break;
+  }
+  return pista;
+}
+
+//objeto inimigo
+class inimigo 
+{
+  constructor(img)
+  {
+    this.pos_x = pistas();
+    this.pos_y = -60;
+    this.velocidade = 2;
+    this.imagem = img;
+  }
+  
+  mover()
+  {
+    this.pos_y += this.velocidade
+    
+    if(this.pos_y >= 550)
+    {
+      this.pos_y = -random(60,150);
+      this.pos_x = pistas();
+    }
+    image(this.imagem,this.pos_x,this.pos_y);
+  }
+}
+
+//vetor de inimigos
+let inimigos = [];
+
+function adicionar_inimigo()
+{
+  inimigos.push(new inimigo(imagem_inimigo));
+}
+
+//tempo dentro de jogo
+let tempo = 0,
+    tempo_fim = 0,
+    seg = 5,
+    seg_fim = 0;
+
+//carregar imangens e sons
+function preload()
+{
+  imagem_logo = loadImage('Bom_de_Rodas_8_bits.png');
+  imagem_jogo = loadImage('Tela_Jogo.png');
+  imagem_fim_de_jogo = loadImage('Fim_de_Jogo.png');
+  imagem_tutorial = loadImage('Tela_Tutorial.png');
+  
+  imagem_creditos = loadImage('Tela_Creditos.png');
+  imagem_botao_voltar[0] = loadImage('Botão_Voltar.png');
+  imagem_botao_jogar[0] = loadImage('Botão_Jogar.png');
+  imagem_botao_tutorial[0] = loadImage('Botão_Tutorial.png');
+  imagem_botao_creditos[0] = loadImage('Botão_Creditos.png');
+  imagem_botao_musica[0] = loadImage('Botão_Musica.png');
+  
+  imagem_botao_voltar[1] = loadImage('Botão_Voltar_selec.png');
+  imagem_botao_jogar[1] = loadImage('Botão_Jogar_selec.png');
+  imagem_botao_tutorial[1] = loadImage('Botão_Tutorial_selec.png');
+  imagem_botao_creditos[1] = loadImage('Botão_Creditos_selec.png');
+  imagem_botao_musica[1] = loadImage('Botão_Musica_selec.png');
+  
+  imagem_jogador = loadImage('Personagem.png');
+  imagem_inimigo = loadImage('Inimigo.png');
+  
+  som_botao_selec = loadSound('select.wav');
+  som_colisao = loadSound('colision.wav');
+  //musica_jogo
+  musica_menu = loadSound('musica_menu.mp3');
+  musica_jogo = loadSound('musica_jogo.mp3');
+  musica_fim = loadSound('musica_fim.mp3');
+}
+
+function setup() 
+{
+  createCanvas(canvas_x, canvas_y);
+  frameRate(30);
+  cena = 0; 
+  adicionar_inimigo();
+}
+
+function draw() 
+{
+  //fazer vetor inimigos
+  background(0);
+  cenas(cena);
+}
+
+//GERENCIADOR DE CENAS
+function cenas(c)
+{
+  switch(c)
+  {
+    case 0:
+      jogo_menu();
+      break;
+    case 1:
+      jogo_cenario();
+      break;
+    case 2:
+      jogo_tutorial();
+      break;
+    case 3:
+      jogo_creditos();
+      break;
+    case 4:
+      jogo_fim();
+      break;
+  }
+}
+//
+
+//CENAS
+function jogo_menu()
+{ 
+  //deixando a musica em loop
+  if(!musica_menu.isPlaying())
+  {
+    musica_menu.setVolume(0.5);
+    musica_menu.loop();
+  }
+  //imagem dos botoes
+  image(imagem_logo,pos_logo_x,pos_logo_y,400,200);
+  image(imagem_botao_jogar[0],pos_botao_jogar_x,pos_botao_jogar_y);
+  image(imagem_botao_tutorial[0],pos_botao_tuto_x,pos_botao_tuto_y); 
+  image(imagem_botao_creditos[0],pos_botao_cred_x,pos_botao_cred_y);
+  //
+  //verificar se pode clicar no botao e realizar a acao do mesmo
+  let dist_jogar = parseInt(dist(mouseX,mouseY,pos_botao_jogar_x+75,pos_botao_jogar_y+15));
+  let dist_tuto = parseInt(dist(mouseX,mouseY,pos_botao_tuto_x+75,pos_botao_tuto_y+15));
+  let dist_cred = parseInt(dist(mouseX,mouseY,pos_botao_cred_x+75,pos_botao_cred_y+15));
+  
+  if(dist_jogar <= 50)
+  {
+    image(imagem_botao_jogar[1],pos_botao_jogar_x,pos_botao_jogar_y);
+    if(mouseIsPressed)
+    {
+      musica_menu.stop();
+      som_botao_selec.play();
+      cena = 1;
+    }
+  }
+  else if(dist_tuto <= 50)
+  {
+    image(imagem_botao_tutorial[1],pos_botao_tuto_x,pos_botao_tuto_y);
+    if(mouseIsPressed)
+    {
+      som_botao_selec.play();
+      cena = 2;
+    }
+  }
+  else if(dist_cred <= 50)
+  {
+    image(imagem_botao_creditos[1],pos_botao_cred_x,pos_botao_cred_y);
+    if(mouseIsPressed)
+    {
+      som_botao_selec.play();
+      cena = 3;
+    }
+  }
+}
+//Funcionamento do jogo
+function jogo_cenario()
+{
+  //permanece no jogo
+  cena = 1;
+  //contagem para começar
+  if(seg <= 0)
+  {
+    jogador_veloc = 5
+    inimigos[0].velocidade = velocidade;
+    if(!musica_jogo.isPlaying() && tocar_musica == true)
+    {
+      musica_jogo.setVolume(0.5);
+      musica_jogo.loop()
+    }else if(musica_jogo.isPlaying() && tocar_musica == false)
+    {
+      musica_jogo.stop();
+    }
+  }
+  else
+  {
+    tempo++;
+    seg = 5-Math.floor(tempo/30);
+    pontos_contador = 0;
+    
+    jogador_veloc = 0;
+    inimigos[0].velocidade = 0;
+    
+    textSize(72);
+    text(seg,125,150);
+  }
+  //informaçõe do jogo
+  textSize(22);
+  fill(255);
+  text(pontos,pos_pontos_x,pos_pontos_y);
+  text(parseInt(velocidade),pos_velo_x,pos_velo_y);
+  text(nivel,pos_nivel_x,pos_nivel_y);
+  image(imagem_botao_musica[0],pos_botao_musica_x,pos_botao_musica_y);
+  image(imagem_jogo,0,0);
+  //botao de musica
+  let dist_musica = parseInt(dist(mouseX,mouseY,pos_botao_musica_x+30,pos_botao_musica_y+15));
+  if(dist_musica <= 15)
+  {
+    image(imagem_botao_musica[1],pos_botao_musica_x,pos_botao_musica_y);
+    if(mouseIsPressed && tocar_musica == true)
+    {
+      tocar_musica = false;
+    }
+    else if(mouseIsPressed && tocar_musica == false)
+    {
+      tocar_musica = true;
+    }
+  }
+  //movimento do jogador
+  jogador();
+  
+  //pontos
+  pontos_contador++;
+  pontos = Math.floor(pontos_contador/30);
+  
+  //colisao com inimigos
+  for(i=0; i<inimigos.length; i++)
+  {
+    inimigos[i].mover();
+    inimigos[i].velocidade = velocidade;
+    if(dist(jogador_pos_x,jogador_pos_y,inimigos[i].pos_x,inimigos[i].pos_y) <= 49)
+    {
+      inimigos[i].pos_y = -random(50,100);
+      som_colisao.play();
+      jogo_fim();
+      musica_jogo.stop();
+    }
+  }
+  //atualizacao de nivel, velocidade e adicionar inimigo
+  if(pontos >= pontos_limite)
+  {
+    pontos_limite += random(25,50);
+    nivel++;
+    velocidade += random(1,1.5);
+    adicionar_inimigo();
+  }
+}
+//instrucoes
+function jogo_tutorial()
+{
+  image(imagem_tutorial,0,0)
+  //verificar botao de voltar
+  image(imagem_botao_voltar[0],pos_botao_voltar_x,pos_botao_voltar_y);
+  //botão voltar
+  let dist_voltar_tuto = parseInt(dist(mouseX,mouseY,pos_botao_voltar_x+75,pos_botao_voltar_y+25));
+
+  if(dist_voltar_tuto <= 50)
+  {
+    image(imagem_botao_voltar[1],pos_botao_voltar_x,pos_botao_voltar_y);
+    if(mouseIsPressed)
+    {
+      som_botao_selec.play();
+      cena = 0;
+    }
+  }
+  
+}
+//informacoes
+function jogo_creditos()
+{
+  image(imagem_creditos,0,0);
+  image(imagem_botao_voltar[0],pos_botao_voltar_x,pos_botao_voltar_y);
+  //botão voltar
+  let dist_voltar_cred = parseInt(dist(mouseX,mouseY,pos_botao_voltar_x+75,pos_botao_voltar_y+25));
+
+  if(dist_voltar_cred <= 50)
+  {
+    image(imagem_botao_voltar[1],pos_botao_voltar_x,pos_botao_voltar_y);
+    if(mouseIsPressed)
+    {
+      som_botao_selec.play();
+      cena = 0;
+    }
+  }
+}
+//tela fim de jogo
+function jogo_fim()
+{
+  background(0);
+  image(imagem_fim_de_jogo,0,0);
+  textSize(150);
+  text(seg_fim,150,350);
+  
+  tempo_fim++;
+  seg_fim = 9 - Math.floor(tempo_fim/30);
+  
+  if(seg_fim <= 0)
+  {
+    //resetar tudo e voltar para o menu
+    cena = 0;
+    musica_fim.stop();
+    resetar();
+  }
+  else
+  {
+    cena = 4;
+    if(!musica_fim.isPlaying())
+    {
+      musica_fim.setVolume(0.5);
+      musica_fim.play();
+    }
+  }
+}
+//resetar configuracoes de inimigos , pontos, velocidade e tempo
+function resetar()
+{
+  for(i=inimigos.length-1; i>0; i--)
+  {
+    inimigos.splice(i);
+  }
+  tempo = 0;
+  seg = 5;
+  tempo_fim = 0;
+  seg_fim = 9;
+  pontos = 0;
+  pontos_contador = 0;
+  pontos_limite = 25;
+  nivel = 1;
+  velocidade = 2;
+}
